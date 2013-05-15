@@ -19,7 +19,7 @@ var Dataset = (function() {
       $.error('no template engine specified');
     }
 
-    if (!o.local && !o.prefetch && !o.remote) {
+    if (!o.local && !o.prefetch && !o.remote && !o.source) {
       $.error('one of local, prefetch, or remote is required');
     }
 
@@ -35,6 +35,7 @@ var Dataset = (function() {
     this.local = o.local;
     this.prefetch = o.prefetch;
     this.remote = o.remote;
+    this.source = o.source;
 
     this.itemHash = {};
     this.adjacencyList = {};
@@ -52,7 +53,6 @@ var Dataset = (function() {
     _processLocalData: function(data) {
       this._mergeProcessedData(this._processData(data));
     },
-
     _loadPrefetchData: function(o) {
       var that = this,
           thumbprint = VERSION + (o.thumbprint || ''),
@@ -237,11 +237,15 @@ var Dataset = (function() {
 
       this.local && this._processLocalData(this.local);
       this.transport = this.remote ? new Transport(this.remote) : null;
-
-      deferred = this.prefetch ?
-        this._loadPrefetchData(this.prefetch) :
-        $.Deferred().resolve();
-
+	  
+  	  if(this.source) {
+  	    deferred = $.when(this.source()).done(this._processLocalData);
+  	  }
+  	  else {
+        deferred = this.prefetch ?
+          this._loadPrefetchData(this.prefetch) :
+          $.Deferred().resolve();
+  	  }
       this.local = this.prefetch = this.remote = null;
       this.initialize = function() { return deferred; };
 
