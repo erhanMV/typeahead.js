@@ -377,7 +377,10 @@
                 $.error("no template engine specified");
             }
             if (!o.local && !o.prefetch && !o.remote && !o.source) {
-                $.error("one of local, prefetch, or remote is required");
+                $.error("one of local, prefetch, remote, or source is required");
+            }
+            if (o.source && !$.isFunction(o.source)) {
+                $.error("source must be a function");
             }
             this.name = o.name || utils.getUniqueId();
             this.limit = o.limit || 5;
